@@ -1,0 +1,219 @@
+package pages;
+
+import io.qameta.allure.Step;
+import org.junit.jupiter.api.Assertions;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.Select;
+
+import java.util.List;
+
+/**
+ * Класс FoodPage представляет страницу, связанную с управлением товарами в приложении.
+ * Он содержит методы для взаимодействия с элементами страницы и выполнения
+ * проверок, связанных с продуктами.
+ */
+public class FoodPage extends BasePage{
+
+    @FindBy(xpath = "//h5[text() = 'Список товаров']")
+    private WebElement foodPageTitle;
+
+    @FindBy(xpath = "//button[text() = 'Добавить']")
+    private WebElement addButton;
+
+    @FindBy(id = "editModalLabel")
+    private WebElement modalMenuLabel;
+
+    @FindBy(id = "name")
+    private WebElement foodNameField;
+
+    @FindBy(id = "type")
+    private WebElement foodTypeList;
+
+    @FindBy(id = "exotic")
+    private WebElement exoticCheckBox;
+
+    @FindBy(id = "save")
+    private WebElement saveButton;
+
+    @FindBy(css = "table.table tbody tr")
+    private List<WebElement> tableRows;
+    /**
+     * Конструктор класса FoodPage.
+     */
+    public FoodPage() {
+        super();
+    }
+    /**
+     * Проверка заголовка страницы.
+     *
+     * @param title Ожидаемое название страницы.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Проверка заголовка страницы {title}")
+    public FoodPage verifyPageTitle(String title){
+        waitForElementToBeVisible(foodPageTitle);
+        Assertions.assertEquals(title, foodPageTitle.getText(), "Заголовок страницы не совпадает с ожидаемым");
+        return this;
+    }
+    /**
+     * Нажимает на кнопку "Добавить".
+     *
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Клик по кнопке \"Добавить\"")
+    public FoodPage clickAddButton(){
+        waitForElementToBeClickable(addButton);
+        if(addButton == null){
+            Assertions.fail("Кнопка 'Добавить' не была найдена");
+            return this;
+        }
+        addButton.click();
+        return this;
+    }
+    /**
+     * Проверка заголовка модального окна при добавлении продукта.
+     *
+     * @param title Ожидаемый заголовок модального окна.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Проверка заголовка {title}")
+    public FoodPage verifyModalMenuLabel(String title){
+        waitForElementToBeVisible(modalMenuLabel);
+        Assertions.assertEquals(title, modalMenuLabel.getText(), "Заголовок страницы не совпадает с ожидаемым");
+        return this;
+    }
+    /**
+     * Заполнение поля для наименования продукта.
+     *
+     * @param value Наименование продукта.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Заполням поле значением {value}")
+    public FoodPage fillNameField(String value){
+        fillInputField(foodNameField, value);
+        return this;
+    }
+    /**
+     * Выбор типа продукта из выпадающего списка.
+     *
+     * @param foodType Тип продукта (например, "овощ", "фрукт").
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Выбор типа продукта {foodType} из выпадающего списка")
+    public FoodPage selectFoodType(String foodType){
+        Select select = new Select(foodTypeList);
+        select.selectByVisibleText(foodType);
+        return this;
+    }
+    /**
+     * Установка флага экзотичности для продукта.
+     *
+     * @param isExotic Флаг экзотичности, true для экзотичного продукта, false - для обычного.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Установка флага {isExotic} экзотичности для продукта")
+    public FoodPage setExoticCheckBox(boolean isExotic){
+        waitForElementToBeVisible(exoticCheckBox);
+        boolean isCurrentlySelected = exoticCheckBox.isSelected();
+        if (isCurrentlySelected != isExotic) {
+            exoticCheckBox.click();
+        }
+        return this;
+    }
+    /**
+     * Нажимает на кнопку "Сохранить". для добавления нового продукта.
+     *
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Клик по кнопке \"Сохранить\"")
+    public FoodPage clickSaveButton(){
+        waitForElementToBeClickable(saveButton);
+        if(saveButton == null){
+            Assertions.fail("Кнопка 'Сохранить' не была найдена");
+            return this;
+        }
+        saveButton.click();
+        return this;
+    }
+    /**
+     * Проверка последней строки таблицы продуктов после добавления нового продукта.
+     *
+     * @param expectedName Ожидаемое наименование продукта.
+     * @param expectedType Ожидаемый тип продукта.
+     * @param expectedExotic Ожидаемое значение флага экзотичности.
+     */
+    @Step("Проверка последней строки таблицы продуктов после добавления нового продукта")
+    public FoodPage verifyLastRow(String expectedName, String expectedType, String expectedExotic){
+        driver.navigate().refresh();
+        WebElement lastRow = getLastRow();
+        List<WebElement> columns = lastRow.findElements(By.tagName("td"));  // Получаем ячейки в последней строке
+        Assertions.assertAll("Проверка добавления товара в список товаров",
+                () -> Assertions.assertEquals(expectedName, columns.get(0).getText(), "Наименование не совпадает" +
+                        " с ожидаемым"),
+                () -> Assertions.assertEquals(expectedType, columns.get(1).getText(), "Тип не совпадает с " +
+                        "ожидаемым"),
+                () -> Assertions.assertEquals(expectedExotic, columns.get(2).getText(), "Значение 'Экзотичный' " +
+                        "не совпадает с ожидаемым")
+        );
+        return this;
+    }
+    /**
+     * Проверяет, что продукт с указанным наименованием, типом и экзотичностью отсутствует в таблице товаров.
+     *
+     * Этот метод обновляет страницу и ищет в таблице строку, соответствующую заданным параметрам продукта.
+     * Если строка найдена, метод будет утверждать, что продукт все еще присутствует в таблице, что
+     * является ошибкой, и выдаст сообщение об ошибке.
+     *
+     * @param productName Наименование продукта, которое необходимо проверить.
+     * @param foodType Тип продукта, который необходимо проверить.
+     * @param isExotic Указывает на экзотичность продукта которую необходимо проверить.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Проверка отсутствия товара с наименованием {productName} и типом {foodType} в таблице")
+    public FoodPage verifyProductNotInTable(String productName, String foodType, String isExotic) {
+        driver.navigate().refresh();
+        List<WebElement> rows = tableRows;
+        boolean productFound = false;
+        for (WebElement row : rows) {
+            List<WebElement> columns = row.findElements(By.tagName("td"));
+            String nameInTable = columns.get(0).getText();
+            String typeInTable = columns.get(1).getText();
+            String exoticInTable = columns.get(2).getText();
+            if (nameInTable.equals(productName) && typeInTable.equals(foodType) && exoticInTable.equals(isExotic)) {
+                productFound = true;
+                break;
+            }
+        }
+        Assertions.assertFalse(productFound,
+                String.format("Товар с наименованием '%s' и типом '%s' все еще присутствует в таблице.", productName, foodType));
+
+        return this;
+    }
+    /**
+     * Получение последней строки таблицы.
+     *
+     * @return Последняя строка таблицы.
+     */
+    public WebElement getLastRow() {
+        driver.navigate().refresh();
+        List<WebElement> rows = tableRows;
+        if (rows.isEmpty()) {
+            Assertions.fail("Не найдено ни одной строки в таблице.");
+        }
+        return rows.get(rows.size() - 1);
+    }
+    /**
+     * Проверка сброса данных на странице.
+     *
+     * @param size Ожидаемое количество строк в таблице после сброса.
+     * @return Текущая страница FoodPage для цепочки вызовов.
+     */
+    @Step("Проверка сброса данных на странице")
+    public FoodPage verifyResetData(int size){
+        driver.navigate().refresh();
+        Assertions.assertEquals(size, tableRows.size());
+        return this;
+    }
+}
