@@ -2,6 +2,7 @@ package definitions.hooks;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.qameta.allure.Step;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,7 +29,9 @@ public class DBHooks {
      *
      * @throws SQLException если не удалось установить соединение с базой данных
      */
+
     @Before("@AddFoodDB")
+    @Step("Устанавливаем соединение с базой данных")
     public void setUp() throws SQLException {
         connection = DriverManager.getConnection(DB_URL, USER_NAME, PASS);
         statement = connection.createStatement();
@@ -40,7 +43,9 @@ public class DBHooks {
      *
      * @throws SQLException если не удалось закрыть соединение с базой данных
      */
+
     @After("@AddFoodDB")
+    @Step("Закрываем соединение с базой данных")
     public void tearDown() throws SQLException {
         if (statement != null) {
             statement.close();

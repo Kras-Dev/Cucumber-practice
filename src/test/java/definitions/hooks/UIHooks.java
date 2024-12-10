@@ -2,6 +2,7 @@ package definitions.hooks;
 
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import io.qameta.allure.Step;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -21,6 +22,7 @@ public class UIHooks {
      * Инициализирует WebDriver, устанавливает таймауты загрузки страницы и максимизирует окно браузера.
      */
     @Before("@AddFoodUI")
+    @Step("Инициализируем драйвер браузера")
     public void setUp() {
         //System.setProperty("webdriver.chrome.driver", "src/test/resources/drivers/chromedriver.exe");
         driver = new ChromeDriver();
@@ -34,6 +36,7 @@ public class UIHooks {
      * Завершает работу WebDriver, если он был инициализирован.
      */
     @After("@AddFoodUI")
+    @Step("Закрываем браузер")
     public void tearDown() {
         if (driver != null) {
             driver.quit();
